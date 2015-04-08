@@ -46,6 +46,12 @@ module.exports = function(source) {
       return res.sendStatus(404)
     }
 
+    var response = {
+      meta:{
+        profile: req.headers.referer + req.url.substr(1),
+        page: {}
+      }
+    }
     // Filters list
     var filters = {}
 
@@ -103,6 +109,8 @@ module.exports = function(source) {
       }
     }
 
+    response.meta.page.total = array.length
+
     // Sort
     if(_sort) {
       _order = _order || 'ASC'
@@ -126,16 +134,19 @@ module.exports = function(source) {
       array = array.slice(_start, _end)
     }
 
-    res.jsonp(array)
+    response.data = array
+    res.jsonp(response)
   }
 
   // GET /:resource/:id
   function show(req, res, next) {
+    var response = {}
     var resource = db(req.params.resource)
       .get(+req.params.id)
 
     if (resource) {
-      res.jsonp(resource)
+      response.data = resource
+      res.jsonp(response)
     } else {
       res.status(404).jsonp({})
     }
